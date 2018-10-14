@@ -134,16 +134,16 @@ int main(int argc, char** argv) {
     // Cartesian coords, including orientations not needed yet; is constructed
     // inside the generic planner by interpolation std::vector<Eigen::Affine3d>
     // affine_path;
-    Eigen::Matrix3d R_down;  // define an orientataion corresponding to
-                             // toolflange pointing down
+    Eigen::Matrix3d R_FaceAudience;  // define an orientataion corresponding to
+                             // toolflange facing audience
     Eigen::Vector3d x_axis, y_axis, z_axis, flange_origin;
-    z_axis << 0, 0, -1;             // points flange down
-    x_axis << -1, 0, 0;             // arbitrary
+    z_axis << 1, 0, 0;             // ! points facing audience
+    x_axis << 0, 1, 0;             // arbitrary
     y_axis = z_axis.cross(x_axis);  // construct y-axis consistent with
                                     // right-hand coordinate frame
-    R_down.col(0) = x_axis;
-    R_down.col(1) = y_axis;
-    R_down.col(2) = z_axis;
+    R_FaceAudience.col(0) = x_axis;
+    R_FaceAudience.col(1) = y_axis;
+    R_FaceAudience.col(2) = z_axis;
     flange_origin << 0.2, 0, 0.01;
     int nsteps = 5;  // will need to specify how many interpolation points in
                      // Cartesian path
@@ -207,13 +207,13 @@ int main(int argc, char** argv) {
                                               << endl);
 
     goal_flange_affine.linear() =
-        R_down;  // set the  goal orientation for flange to point down; will not
+        R_FaceAudience;  // set the  goal orientation for flange to point down; will not
                  // need to change this for now
     ROS_INFO(
         "Initialization stage passed, hand over to my own creation now....");
 
     // ! Star your code below
-    moveRobotTo(0.35, 0, 0.05, 100, 1); //Smooth transition to the initialization position
+    moveRobotTo(0.5, 0, 0.35, 100, 1); //Smooth transition to the initialization position
     ROS_INFO("System ready....Please toggle TF path in RVIZ");
     ros::Duration(10).sleep();
 
@@ -231,7 +231,7 @@ int main(int argc, char** argv) {
             0.35;
         // TUNE: this value can and should be tuned to observe result.
         t = t + 0.1;  
-        moveRobotTo(x, y, 0.05, 10, 1);
+        moveRobotTo(0.5, y, x, 10, 1);
     }
     ROS_WARN("Drawing complete!");
 }

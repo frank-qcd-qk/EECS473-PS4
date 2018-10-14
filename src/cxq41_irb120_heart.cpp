@@ -44,7 +44,7 @@ Eigen::VectorXd g_q_vec_arm_Xd;
 std::vector<Eigen::VectorXd>
     optimal_path;  // a path in joint space is a sequence of 6-DOF joint-angle
                    // specifications
-int switch = 0;  // since now changed to function, we still need a mechanism to
+int killSwitch = 0;  // since now changed to function, we still need a mechanism to
                  // kill node instead of coredump, here is a work around
 
 // a utility for debugging: displays affines (origins only) from an std::vector
@@ -86,12 +86,11 @@ void print_traj(trajectory_msgs::JointTrajectory des_trajectory) {
  */
 void moveRobotTo(float x, float y, float z, int resolution, int motionTime) {
     // * Declaration
-    trajectory_msgs::new_trajectory;  // will package trajectory messages here
+    trajectory_msgs::JointTrajectory new_trajectory;  // will package trajectory messages here
     Eigen::Vector3d flange_origin;
 
-    // * action
-    flange_origin << x, y, z;  // manually prescribed flange pose; in the
-                               // future, compute this based  on perception
+    // * Action
+    flange_origin << x, y, z;
     goal_flange_affine.translation() = flange_origin;
     ROS_INFO_STREAM("move to flange origin: "
                     << goal_flange_affine.translation().transpose() << endl);
@@ -110,18 +109,17 @@ void moveRobotTo(float x, float y, float z, int resolution, int motionTime) {
             g_q_vec_arm_Xd, goal_flange_affine, resolution, optimal_path)) {
         ROS_ERROR(
             "no feasible IK path for specified Cartesian motion; quitting");
-        switch
-            = 1;
+        killSwitch = 1; //There should be an observer inside the loop
     } else {
-        ROS_INFO("Judgement passed!");
+        ROS_INFO("Path Found! Moving now....");
     }
     // convert the path to a trajectory (adds joint-space names,  arrival times,
     // etc)
     pCartTrajPlanner->path_to_traj(optimal_path, motionTime, new_trajectory);
-    print_traj(new_trajectory);
+    print_traj(new_trajectory); //Enable only if you want to get flushed by data.
     traj_publisher.publish(new_trajectory);  // publish the trajectory
     ros::Duration(motionTime).sleep();       // wait for the motion
-    ROS_INFO("Movement complete!....")
+    ROS_INFO("Movement complete!....");
 }
 
 int main(int argc, char** argv) {
@@ -163,7 +161,8 @@ int main(int argc, char** argv) {
         0;  // assumes arm starts in this pose; better would be  to subscribe to
             // joint_states to get actual angles
 
-    // our irb120 control  interface uses this topic to receive trajectories
+    // our irb120 control interface uses this topic to receive trajectories
+    //Previously declared as global, no need to re-declare
     traj_publisher =
         nh.advertise<trajectory_msgs::JointTrajectory>("joint_path_command", 1);
 
@@ -220,8 +219,8 @@ int main(int argc, char** argv) {
     double t = 0.00;
     double z = 0.00;
     while (t < 6.28) {
-        if (switch = 1) {
-            ROS_ERROR("NO path found, throwing error now....")
+        if (killSwitch== 1) {
+            ROS_ERROR("NO path found, throwing error now....");
             return 1;
         }
         float y = (16 * (sin(t)) * (sin(t)) * (sin(t))) / 100;

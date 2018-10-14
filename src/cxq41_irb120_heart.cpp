@@ -212,10 +212,12 @@ int main(int argc, char** argv) {
     ROS_INFO(
         "Initialization stage passed, hand over to my own creation now....");
 
-    // ! Work in progress
-    moveRobotTo(0.3, 0, 0.1, 10, 1);
+    // ! Star your code below
+    moveRobotTo(0.35, 0, 0.05, 100, 1); //Smooth transition to the initialization position
+    ROS_INFO("System ready....Please toggle TF path in RVIZ");
+    ros::Duration(10).sleep();
 
-    // Draw a heart to show the love for irb120........
+    // ! Draw a heart to show the love for irb120........
     double t = 0.00;
     double z = 0.00;
     while (t < 6.28) {
@@ -227,9 +229,9 @@ int main(int argc, char** argv) {
         float x =
             (13 * cos(t) - 5 * cos(2 * t) - 2 * cos(3 * t) - cos(4 * t)) / 100 +
             0.35;
-        t = t +
-            0.1;  // TUNE: this value can and should be tuned to observe result.
+        // TUNE: this value can and should be tuned to observe result.
+        t = t + 0.1;  
         moveRobotTo(x, y, 0.05, 10, 1);
     }
-    // ! work in progress
+    ROS_WARN("Drawing complete!");
 }

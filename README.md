@@ -23,5 +23,6 @@ rosrun cxq41_ps4_irb120_draw_heart cxq41_ps4_irb120_draw_heart
 
 ## Live demo...
 Find it here:
-
+https://youtu.be/5lbOHoOR7zA
 Chinese useres:
+Link not yet available via Bilibili
